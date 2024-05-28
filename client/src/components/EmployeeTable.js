@@ -23,7 +23,8 @@ const initialEmployeeData = [
     LName: 'Doe',
     Gender: 'Male',
     Phone_number: '123-456-7890',
-    Personal_mail: 'john.doe@example.com'
+    Personal_mail: 'john.doe@example.com',
+    Hardware_name: 'Laptop A'
   },
   {
     Employee_id: 2,
@@ -32,7 +33,8 @@ const initialEmployeeData = [
     LName: 'Smith',
     Gender: 'Female',
     Phone_number: '987-654-3210',
-    Personal_mail: 'jane.smith@example.com'
+    Personal_mail: 'jane.smith@example.com',
+    Hardware_name: 'Desktop B'
   }
 ];
 
@@ -85,7 +87,8 @@ function EmployeeTable() {
       LName: '',
       Gender: '',
       Phone_number: '',
-      Personal_mail: ''
+      Personal_mail: '',
+      Hardware_name: ''
     });
     setOpen(true);
   };
@@ -109,6 +112,7 @@ function EmployeeTable() {
             <TableCell>Gender</TableCell>
             <TableCell>Phone Number</TableCell>
             <TableCell>Personal Mail</TableCell>
+            <TableCell>Hardware Name</TableCell>
             <TableCell>Actions</TableCell>
           </TableRow>
         </TableHead>
@@ -122,6 +126,7 @@ function EmployeeTable() {
               <TableCell>{employee.Gender}</TableCell>
               <TableCell>{employee.Phone_number}</TableCell>
               <TableCell>{employee.Personal_mail}</TableCell>
+              <TableCell>{employee.Hardware_name}</TableCell>
               <TableCell>
                 <Button
                   variant="contained"
@@ -198,6 +203,15 @@ function EmployeeTable() {
             type="email"
             fullWidth
             value={currentEmployee.Personal_mail}
+            onChange={handleChange}
+          />
+          <TextField
+            margin="dense"
+            name="Hardware_name"
+            label="Hardware Name"
+            type="text"
+            fullWidth
+            value={currentEmployee.Hardware_name}
             onChange={handleChange}
           />
         </DialogContent>
