@@ -1,10 +1,10 @@
 const db = require('../database/database.js');
 
-// Tüm Software'ları Listeleme (unchanged)
+// Tüm Yazılımları Listeleme
 exports.getAllSoftware = (req, res) => {
     const sql = `SELECT * FROM Software`;
 
-    db.all(sql, [], (err, rows) => {
+    db.query(sql, [], (err, rows) => {
         if (err) {
             res.status(500).send('Sunucu hatası.');
         } else {
@@ -13,7 +13,7 @@ exports.getAllSoftware = (req, res) => {
     });
 };
 
-// Software'i ID'ye Göre Alma (unchanged)
+// Yazılımı ID'ye Göre Alma
 exports.getSoftwareById = (req, res) => {
     const id = parseInt(req.params.id);
     if (isNaN(id)) {
@@ -23,29 +23,29 @@ exports.getSoftwareById = (req, res) => {
 
     const sql = `SELECT * FROM Software WHERE Software_id = ?`;
 
-    db.get(sql, [id], (err, result) => {
+    db.query(sql, [id], (err, results) => {
         if (err) {
             console.error(err);
             res.status(500).send('Sunucu hatası.');
-        } else if (!result) {
+        } else if (results.length === 0) {
             res.status(404).send('Software bulunamadı.');
         } else {
-            res.status(200).send(result);
+            res.status(200).send(results[0]);
         }
     });
 };
 
-// Yazılım Ekleme (using Software_id, Software_type from req.body)
+// Yazılım Ekleme
 exports.addSoftware = (req, res) => {
-  const { software_id, software_type } = req.body;
+    const { Software_id, Software_type } = req.body;
 
-  // Validate data (optional)
-  if (!software_id || !software_type) {
-    res.status(400).send('Gerekli tüm alanlar doldurulmalıdır.');
-    return;
-  }
+    // Gerekli alanların doldurulup doldurulmadığını kontrol et
+    if (!Software_id || !Software_type) {
+        res.status(400).send('Gerekli tüm alanlar doldurulmalıdır.');
+        return;
+    }
 
-  const sql = `
+    const sql = `
     INSERT INTO Software (
       Software_id,
       Software_type
@@ -53,36 +53,36 @@ exports.addSoftware = (req, res) => {
     VALUES (?, ?)
   `;
 
-  db.run(sql, [software_id, software_type], (err) => {
-    if (err) {
-      console.error(err);
-      res.status(500).send('Sunucu hatası.');
-    } else {
-      res.status(201).send({ message: 'Yazılım eklendi.' });
-    }
-  });
+    db.query(sql, [Software_id, Software_type], (err, results) => {
+        if (err) {
+            console.error(err);
+            res.status(500).send('Sunucu hatası.');
+        } else {
+            res.status(201).send({ message: 'Yazılım eklendi.', id: results.insertId });
+        }
+    });
 };
 
-// Yazılım Silme (using Software_id from req.body)
+// Yazılım Silme
 exports.deleteSoftware = (req, res) => {
-  const { software_id } = req.body; // Get software_id from req.body
-  if (!software_id) {
-    res.status(400).send('Geçersiz software ID.');
-    return;
-  }
-
-  const sql = `DELETE FROM Software WHERE Software_id = ?`;
-
-  db.run(sql, [software_id], (err) => {
-    if (err) {
-      console.error(err);
-      res.status(500).send('Sunucu hatası.');
-    } else {
-      if (db.changes === 0) {
-        res.status(404).send('Yazılım bulunamadı.');
-      } else {
-        res.status(200).send({ message: 'Yazılım silindi.' });
-      }
+    const { Software_id } = req.body; // Yazılım ID'sini req.body'den al
+    if (!Software_id) {
+        res.status(400).send('Geçersiz software ID.');
+        return;
     }
-  });
+
+    const sql = `DELETE FROM Software WHERE Software_id = ?`;
+
+    db.query(sql, [Software_id], (err, results) => {
+        if (err) {
+            console.error(err);
+            res.status(500).send('Sunucu hatası.');
+        } else {
+            if (results.affectedRows === 0) {
+                res.status(404).send('Yazılım bulunamadı.');
+            } else {
+                res.status(200).send({ message: 'Yazılım silindi.' });
+            }
+        }
+    });
 };

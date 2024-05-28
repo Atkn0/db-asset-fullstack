@@ -12,14 +12,14 @@ exports.addUses = (req, res) => {
 
     const sql = `INSERT INTO USES (Provider_id, Department_id, Use, Software_id) VALUES (?, ?, ?, ?)`;
 
-    db.run(sql, [Provider_id, Department_id, Use, Software_id], function (err) {
+    db.query(sql, [Provider_id, Department_id, Use, Software_id], (err, results) => {
         if (err) {
             console.error(err.message);
             res.status(500).send('Veritabanına veri eklenirken bir hata oluştu.');
             return;
         }
-        console.log(`Uses kaydı oluşturuldu: ${this.lastID}`);
-        res.status(201).send(`Yeni Uses kaydı oluşturuldu: ${this.lastID}`);
+        console.log(`Uses kaydı oluşturuldu: ${results.insertId}`);
+        res.status(201).send(`Yeni Uses kaydı oluşturuldu: ${results.insertId}`);
     });
 };
 
@@ -27,7 +27,7 @@ exports.addUses = (req, res) => {
 exports.getAllUses = (req, res) => {
     const sql = `SELECT * FROM USES`;
 
-    db.all(sql, [], (err, rows) => {
+    db.query(sql, [], (err, rows) => {
         if (err) {
             console.error(err.message);
             res.status(500).send('Veritabanından veri alınırken bir hata oluştu.');
@@ -49,7 +49,7 @@ exports.deleteUses = (req, res) => {
 
     const sql = `DELETE FROM USES WHERE Provider_id = ? AND Department_id = ? AND Software_id = ?`;
 
-    db.run(sql, [Provider_id, Department_id, Software_id], function (err) {
+    db.query(sql, [Provider_id, Department_id, Software_id], (err, results) => {
         if (err) {
             console.error(err.message);
             res.status(500).send('Veritabanından veri silinirken bir hata oluştu.');

@@ -1,24 +1,14 @@
+const db = require("../database/database");
 
-const db = require("../database/database")
-
-// Tüm Çalışanları Listeleme Fonksiyonu (no changes needed)
-
-/*
- {
-        "Employee_id": 1,
-        "Phone_number": "642-445-4671",
-        "Gender": "Female",
-        "Personal_mail": "vabrahams0@is.gd",
-        "Fname": "Leah",
-        "Mname": "Vickie",
-        "Lname": "Abrahams",
-        "Department_id": 1
-    },
-    */
+// Tüm Çalışanları Listeleme Fonksiyonu
 exports.getAllEmployees = (req, res) => {
   const sql = 'SELECT * FROM Employee';
-  db.all(sql, [], (err, rows) => {
-    if (err) throw err;
+  db.query(sql, (err, rows) => {
+    if (err) {
+      console.error('Veritabanı hatası:', err); // Hata mesajını konsola yazdırın
+      res.status(500).send({ message: 'Veritabanı hatası' }); // Hata mesajı içeren bir JSON cevabı gönderin
+      return; // Hata durumunda fonksiyondan çıkın
+    }
     res.send(rows);
   });
 };
@@ -27,42 +17,47 @@ exports.getAllEmployees = (req, res) => {
 exports.getEmployeeById = (req, res) => {
   const id = parseInt(req.body.id); // Get ID from req.body
   const sql = `SELECT * FROM Employee WHERE Employee_id = ?`;
-  db.get(sql, [id], (err, result) => {
-    if (err) throw err;
-    if (!result) {
+  db.query(sql, [id], (err, results) => {
+    if (err) {
+      console.error('Veritabanı hatası:', err);
+      res.status(500).send({ message: 'Veritabanı hatası' });
+      return;
+    }
+    if (results.length === 0) {
       res.status(404).send('Çalışan bulunamadı.');
       return;
     }
-    res.send(result);
+    res.send(results[0]);
   });
 };
 
+// Çalışan Oluşturma Fonksiyonu
 exports.createEmployee = (req, res) => {
-  const { Employee_id, Phone_number, Gender, Personal_mail, Fname, Mname, Lname, Department_id } = req.body;
+  const { Phone_number, Gender, Personal_mail, Fname, Mname, Lname, Department_id } = req.body;
 
   // Validate required fields (adjust as needed)
-  if (!Employee_id || !Phone_number || !Gender || !Personal_mail || !Fname || !Mname || !Lname || !Department_id) {
-    return res.status(400).send('Hata: Zorunlu alanlar doldurulmalıdır (Employee_id, Phone_number, Gender, Personal_mail, Fname, Mname, Lname, Department_id)');
+  if (!Phone_number || !Gender || !Personal_mail || !Fname || !Lname || !Department_id) {
+    return res.status(400).send('Hata: Zorunlu alanlar doldurulmalıdır (Phone_number, Gender, Personal_mail, Fname, Lname, Department_id)');
   }
 
   const sql = `
-      INSERT INTO Employee (Employee_id, Phone_number, Gender, Personal_mail, Fname, Mname, Lname, Department_id)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO Employee (Phone_number, Gender, Personal_mail, Fname, Mname, Lname, Department_id)
+      VALUES (?, ?, ?, ?, ?, ?, ?)
   `;
 
-  const values = [Employee_id, Phone_number, Gender, Personal_mail, Fname, Mname, Lname, Department_id];
+  const values = [Phone_number, Gender, Personal_mail, Fname, Mname, Lname, Department_id];
 
-  db.run(sql, values, function(err) {
+  db.query(sql, values, (err, result) => {
     if (err) {
+      console.error('Veritabanı hatası:', err);
       res.status(500).send('Hata: Çalışan oluşturulamadı');
       return;
     }
-    res.status(201).send({ id: this.lastID });
+    res.status(201).send({ id: result.insertId });
   });
 };
 
-
-
+// Çalışan Güncelleme Fonksiyonu
 exports.updateEmployee = (req, res) => {
   const { Employee_id, Phone_number, Gender, Personal_mail, Fname, Mname, Lname, Department_id } = req.body;
 
@@ -71,7 +66,6 @@ exports.updateEmployee = (req, res) => {
   let updateValues = [];
 
   // Check for presence of each field and add to update statement
-  
   if (Phone_number) {
     sql += `Phone_number = ?, `;
     updateValues.push(Phone_number);
@@ -109,12 +103,12 @@ exports.updateEmployee = (req, res) => {
   updateValues.push(Employee_id); // Use the extracted Employee_id
 
   // Execute update query
-  db.run(sql, updateValues, function(err) {
+  db.query(sql, updateValues, (err, result) => {
     if (err) {
       res.status(500).send(err.message);
       return;
     }
-    if (this.changes === 0) {
+    if (result.affectedRows === 0) {
       res.status(404).send('Çalışan bulunamadı.');
       return;
     }
@@ -122,32 +116,19 @@ exports.updateEmployee = (req, res) => {
   });
 };
 
-
-
 // Çalışan Silme Fonksiyonu
 exports.deleteEmployee = (req, res) => {
   const id = parseInt(req.body.id); // Get ID from req.body
 
-  // Check for existing employee before deletion (optional)
-  const checkEmployeeSql = `SELECT * FROM Employee WHERE Employee_id = ?`;
-  db.get(checkEmployeeSql, [id], (err, result) => {
+  // Delete employee if found
+  const sql = `DELETE FROM Employee WHERE Employee_id = ?`;
+  db.query(sql, [id], (err, result) => {
     if (err) {
-      throw err;
+      return res.status(500).send(err.message);
     }
-    if (!result) {
+    if (result.affectedRows === 0) {
       return res.status(404).send('Çalışan bulunamadı.');
     }
-
-    // Delete employee if found
-    const sql = `DELETE FROM Employee WHERE Employee_id = ?`;
-    db.run(sql, [id], function(err) {
-      if (err) {
-        return res.status(500).send(err.message);
-      }
-      if (this.changes === 0) {
-        return res.status(404).send('Çalışan bulunamadı.');
-      }
-      res.send({ message: 'Çalışan silindi.' });
-    });
+    res.send({ message: 'Çalışan silindi.' });
   });
 };
