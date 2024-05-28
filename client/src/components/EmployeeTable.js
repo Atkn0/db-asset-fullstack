@@ -24,7 +24,8 @@ const initialEmployeeData = [
     Gender: 'Male',
     Phone_number: '123-456-7890',
     Personal_mail: 'john.doe@example.com',
-    Hardware_name: 'Laptop A'
+    Hardware_id: 101,
+    Software_id: 201
   },
   {
     Employee_id: 2,
@@ -34,7 +35,8 @@ const initialEmployeeData = [
     Gender: 'Female',
     Phone_number: '987-654-3210',
     Personal_mail: 'jane.smith@example.com',
-    Hardware_name: 'Desktop B'
+    Hardware_id: 102,
+    Software_id: 202
   }
 ];
 
@@ -88,7 +90,8 @@ function EmployeeTable() {
       Gender: '',
       Phone_number: '',
       Personal_mail: '',
-      Hardware_name: ''
+      Hardware_id: '',
+      Software_id: ''
     });
     setOpen(true);
   };
@@ -112,7 +115,8 @@ function EmployeeTable() {
             <TableCell>Gender</TableCell>
             <TableCell>Phone Number</TableCell>
             <TableCell>Personal Mail</TableCell>
-            <TableCell>Hardware Name</TableCell>
+            <TableCell>Hardware ID</TableCell>
+            <TableCell>Software ID</TableCell>
             <TableCell>Actions</TableCell>
           </TableRow>
         </TableHead>
@@ -126,7 +130,8 @@ function EmployeeTable() {
               <TableCell>{employee.Gender}</TableCell>
               <TableCell>{employee.Phone_number}</TableCell>
               <TableCell>{employee.Personal_mail}</TableCell>
-              <TableCell>{employee.Hardware_name}</TableCell>
+              <TableCell>{employee.Hardware_id}</TableCell>
+              <TableCell>{employee.Software_id}</TableCell>
               <TableCell>
                 <Button
                   variant="contained"
@@ -207,11 +212,20 @@ function EmployeeTable() {
           />
           <TextField
             margin="dense"
-            name="Hardware_name"
-            label="Hardware Name"
+            name="Hardware_id"
+            label="Hardware ID"
             type="text"
             fullWidth
-            value={currentEmployee.Hardware_name}
+            value={currentEmployee.Hardware_id}
+            onChange={handleChange}
+          />
+          <TextField
+            margin="dense"
+            name="Software_id"
+            label="Software ID"
+            type="text"
+            fullWidth
+            value={currentEmployee.Software_id}
             onChange={handleChange}
           />
         </DialogContent>
